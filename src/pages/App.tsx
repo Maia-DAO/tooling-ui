@@ -25,9 +25,17 @@ import {
   VisuallyHidden,
   CheckboxIcon,
   Icon,
+  HStack,
 } from "@chakra-ui/react";
 import { ColorModeSwitcher } from "./../components/ColorModeSwitcher";
 import { Logo } from "./../components/Logo";
+import {
+  FEE_TO_TICK_SPACING,
+  MAX_TICK,
+  MIN_TICK,
+  positionEfficiency,
+  tickToPrices,
+} from "../utils";
 
 export const App = () => {
   //input state
@@ -37,9 +45,29 @@ export const App = () => {
     setInputValue(value);
   };
 
+  const feeTier = 100;
+  const tickSpacing = FEE_TO_TICK_SPACING[feeTier];
+
+  const [minimum, setMinimum] = React.useState(
+    MIN_TICK - (MIN_TICK % tickSpacing)
+  );
+  const [maximum, setMaximum] = React.useState(
+    MAX_TICK - (MAX_TICK % tickSpacing)
+  );
+
   //slider state
-  const [minValue, setMinValue] = React.useState(0);
-  const [maxValue, setMaxValue] = React.useState(1500);
+  const [minValue, setMinValue] = React.useState(minimum);
+  const [maxValue, setMaxValue] = React.useState(maximum);
+
+  const handleMinimum = (value: number) => {
+    setMinimum(value);
+    if (minValue < value) setMinValue(value);
+  };
+
+  const handleMaximum = (value: number) => {
+    setMaximum(value);
+    if (maxValue > value) setMaxValue(value);
+  };
 
   const handleMinChange = (value: number) => {
     setMinValue(value);
@@ -49,7 +77,10 @@ export const App = () => {
     setMaxValue(value);
   };
 
-  
+  const efficiency = positionEfficiency(feeTier, maxValue - minValue);
+  const lowerPrice = tickToPrices(minValue);
+  const upperPrice = tickToPrices(maxValue);
+
   return (
     <ChakraProvider theme={theme}>
       <Box textAlign="center" fontSize="xl">
@@ -89,29 +120,67 @@ export const App = () => {
                     padding="0.5rem"
                     border="0px"
                   >
+                    <HStack spacing={-10}>
+                      <Text fontSize='md'>$</Text>
+                      <NumberInput
+                        defaultValue={inputValue}
+                        border="none"
+                        focusBorderColor="none"
+                        size="lg"
+                      >
+                        <NumberInputField
+                          display="flex"
+                          border="none"
+                          w="150%"
+                          onChange={(event) =>
+                            handleInputChange(Number(event.target.value))
+                          }
+                        />
+                      </NumberInput>
+                    </HStack>
+                  </StatNumber>
+                </Stat>
+                <Text marginTop="0.5rem">Select ETH price range</Text>
+                <Box>
+                  <HStack spacing={6}>
                     <NumberInput
-                      defaultValue={inputValue}
+                      defaultValue={minimum}
                       border="none"
                       focusBorderColor="none"
                       size="lg"
                     >
+                      <Text>Min Tick</Text>
                       <NumberInputField
                         display="flex"
                         border="none"
                         marginLeft="1rem"
                         w="100%"
                         onChange={(event) =>
-                          handleInputChange(Number(event.target.value))
+                          handleMinimum(Number(event.target.value))
                         }
                       />
                     </NumberInput>
-                  </StatNumber>
-                </Stat>
-                <Text marginTop="0.5rem">Select ETH price range</Text>
-                <Box>
+                    <NumberInput
+                      defaultValue={maximum}
+                      border="none"
+                      focusBorderColor="none"
+                      size="lg"
+                    >
+                      <Text>Max Tick</Text>
+                      <NumberInputField
+                        display="flex"
+                        border="none"
+                        marginLeft="1rem"
+                        w="100%"
+                        onChange={(event) =>
+                          handleMaximum(Number(event.target.value))
+                        }
+                      />
+                    </NumberInput>
+                  </HStack>
                   <RangeSlider
-                    min={0}
-                    max={4000}
+                    min={minimum}
+                    max={maximum}
                     aria-label={["min", "max"]}
                     onChange={([newMinValue, newMaxValue]) => {
                       handleMinChange(newMinValue);
@@ -121,6 +190,7 @@ export const App = () => {
                     aria-valuetext={["10,30"]}
                     marginTop="1rem"
                     w="70%"
+                    step={tickSpacing}
                   >
                     <RangeSliderTrack>
                       <RangeSliderFilledTrack />
@@ -128,16 +198,24 @@ export const App = () => {
                     <RangeSliderThumb
                       index={0}
                       children={
-                        <Tooltip isOpen={true} label={`${minValue}$`}>
-                          .
+                        <Tooltip
+                          placement="bottom-end"
+                          isOpen={true}
+                          label={`$${lowerPrice.toPrecision(5)}`}
+                        >
+                          |
                         </Tooltip>
                       }
                     />
                     <RangeSliderThumb
                       index={1}
                       children={
-                        <Tooltip isOpen={true} label={`${maxValue}$`}>
-                          <Text>.</Text>
+                        <Tooltip
+                          placement="bottom-start"
+                          isOpen={true}
+                          label={`$${upperPrice.toPrecision(5)}`}
+                        >
+                          |
                         </Tooltip>
                       }
                     />
@@ -145,6 +223,9 @@ export const App = () => {
                 </Box>
                 <Text marginTop="3rem" fontSize="sm">
                   Current price: $2,000
+                </Text>
+                <Text fontSize="sm">
+                  Fee Tier: {feeTier / 10000}%
                 </Text>
               </CardBody>
             </Card>
@@ -167,7 +248,7 @@ export const App = () => {
                   <Center>
                     <Icon
                       viewBox="0 0 200 200"
-                      color="green.500"
+                      color="green"
                       w="1rem"
                       h="1rem"
                     >
@@ -194,9 +275,10 @@ export const App = () => {
                         padding="0.5rem"
                         border="0px"
                       >
-                        0
+                        {/* <Text>{inputValue}$</Text> */}
                       </StatNumber>
                     </Stat>
+                    <Text color="green">${inputValue.toFixed(0)}</Text>
                   </VStack>
                   <VStack>
                     <Stat>
@@ -208,8 +290,9 @@ export const App = () => {
                         padding="0.5rem"
                         border="0px"
                       >
-                        0
+                        {/* <Text>{(inputValue * efficiency).toFixed(0)}$</Text> */}
                       </StatNumber>
+                      <Text>${(inputValue * efficiency).toFixed(0)}</Text>
                     </Stat>
                   </VStack>
                 </Center>
@@ -229,13 +312,13 @@ export const App = () => {
                         padding="0.5rem"
                         border="0px"
                       >
-                        <Flex>2.3x</Flex>
+                        <Flex>{efficiency.toFixed(2)}x</Flex>
                       </StatNumber>
                     </Stat>
                     <Text fontSize="md">
                       These two positions will earn equal fees and perform
-                      idenitcally while the price remains between ${minValue}{" "}
-                      and ${maxValue}.
+                      idenitcally while the price remains between ${lowerPrice.toPrecision(4)}{" "}
+                      and ${upperPrice.toPrecision(4)}.
                     </Text>
                   </VStack>
                 </Center>
