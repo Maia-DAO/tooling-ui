@@ -10,7 +10,7 @@ export const FEE_TO_TICK_SPACING: { [fee: number]: number } = {
   10000: 200,
 };
 
-export function getLargerInTicks(
+function getLargerInTicks(
   tickSpacing: number,
   minWidth: number
 ): number {
@@ -20,24 +20,14 @@ export function getLargerInTicks(
   );
 }
 
-export function positionEfficiency(feeTier: number, minWidth: number): number {
+export function incentiveEfficiency(feeTier: number, minWidth: number): number {
   const tickSpacing = FEE_TO_TICK_SPACING[feeTier];
   return (
     1 /
     (1 -
-      (1 / (1 + TICK_INCREMENT * getLargerInTicks(tickSpacing, minWidth))) **
+      (1 /
+        (1 + (TICK_INCREMENT * getLargerInTicks(tickSpacing, minWidth)) / 2)) **
         (1 / 4))
-  );
-}
-
-export function convertBasedOnEfficiency(
-  amount: number,
-  feeTier: number,
-  minWidth: number
-): number {
-  return (
-    (amount * positionEfficiency(feeTier, 0)) /
-    positionEfficiency(feeTier, minWidth)
   );
 }
 
