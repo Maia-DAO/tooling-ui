@@ -1,3 +1,5 @@
+import { incentiveEfficiencyVsUniswapV2 } from "./uniHelpers";
+
 const total = 6;
 const assetNumber = 2;
 
@@ -39,7 +41,7 @@ function liquidityDifference(
   return inverseFunction(priceUpper) - currentPrice;
 }
 
-export function improvementRatio(
+function efficiencyRatio(
   currentPrice: number,
   priceUpper: number
 ): number {
@@ -54,5 +56,25 @@ export function improvementRatio(
     priceUpper
   );
 
-  return liquidityDiffVolatileAMM / liquidityDiffStableAMM;
+  return Math.abs(liquidityDiffVolatileAMM / liquidityDiffStableAMM);
+}
+
+export function incentiveEfficiencyVssAMM(
+  feeTier: number,
+  minWidth: number,
+  currentPrice: number,
+  priceUpper: number
+): number {
+  const efficiencyStableAMM = efficiencyRatio(currentPrice, priceUpper);
+
+  const efficiencyVolatileAMM = incentiveEfficiencyVsUniswapV2(
+    feeTier,
+    minWidth,
+    currentPrice,
+    priceUpper
+  );
+
+  return (
+    efficiencyVolatileAMM / efficiencyStableAMM
+  );
 }

@@ -10,17 +10,19 @@ export const FEE_TO_TICK_SPACING: { [fee: number]: number } = {
   10000: 200,
 };
 
-function getLargerInTicks(
-  tickSpacing: number,
-  minWidth: number
-): number {
+function getLargerInTicks(tickSpacing: number, minWidth: number): number {
   return Math.max(
     tickSpacing,
     Math.floor(minWidth / tickSpacing) * tickSpacing
   );
 }
 
-export function incentiveEfficiency(feeTier: number, minWidth: number): number {
+export function incentiveEfficiencyVsUniswapV2(
+  feeTier: number,
+  minWidth: number,
+  currentPrice: number,
+  priceUpper: number
+): number {
   const tickSpacing = FEE_TO_TICK_SPACING[feeTier];
   return (
     1 /
