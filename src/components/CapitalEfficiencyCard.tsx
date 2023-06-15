@@ -33,6 +33,7 @@ import {
   AbsoluteCenter,
   SliderMark,
   useRadioGroup,
+  Link,
 } from "@chakra-ui/react";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
 import { Logo } from "./Logo";
@@ -372,8 +373,17 @@ export const CapitalEfficiencyCard = () => {
                 These two incentives will pay the same amount of rewards to
                 useful liquidity of positions with ranges larger than{" "}
                 {percentageRange.toPrecision(2)}% ({range}{" "}
-                {range === 1 ? "Tick" : "Ticks"}).{" "}
+                {range === 1 ? "Tick" : "Ticks"}).
               </Text>
+              <Link
+                color="#ff007a"
+                isExternal
+                href="https://medium.com/@maiaDAO/incentives-efficiency-bribes-in-a-concentrated-liquidity-environment-9035317ac5e3"
+              >
+                <Text fontSize="sm" align="left">
+                  Learn more
+                </Text>
+              </Link>
             </VStack>
           </CardBody>
         </Card>
