@@ -370,7 +370,7 @@ export const CapitalEfficiencyCard = () => {
               </Stat>
               <Text marginTop="1rem" fontSize="md" align="left">
                 These two incentives will pay the same amount of rewards to
-                useful liquidity of positions with a range larger than{" "}
+                useful liquidity of positions with ranges larger than{" "}
                 {percentageRange.toPrecision(2)}% ({range}{" "}
                 {range === 1 ? "Tick" : "Ticks"}).{" "}
               </Text>
