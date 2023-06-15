@@ -1,6 +1,6 @@
 import { incentiveEfficiencyVsUniswapV2 } from "./uniHelpers";
 
-const total = 4.9 * 1e18;
+const total = 5.66;
 const assetNumber = 2;
 
 function univ2Inverse(x: number, D: number, N: number): number {
@@ -9,49 +9,28 @@ function univ2Inverse(x: number, D: number, N: number): number {
   return Math.pow(D, 2) / (x * Math.pow(N, 2));
 }
 
-function iroot(base: bigint, root: bigint) {
-  let s = base + 1n;
-  let k1 = root - 1n;
-  let u = base;
-  while (u < s) {
-    s = u;
-    u = (u * k1 + base / u ** k1) / root;
-  }
-  return s;
-}
+function hermesInverse(x: number, D: number, N: number): number {
+  if (x <= 0) return 0;
 
-function hermesInverse(x: bigint, D: bigint, N: bigint): number {
-  if (x <= BigInt(0)) return 0;
-
-  const root = iroot(
-    iroot(
-      4n * x ** 8n + (27n * D ** (2n * (N + 2n)) * 1n) / N ** (2n * (N + 1n)),
-      2n
+  const root = Math.pow(
+    Math.sqrt(
+      4 * Math.pow(x, 8) +
+        27 * Math.pow(D, 2 * (N + 2)) * Math.pow(N, 2 * (-N - 1))
     ) /
-      BigInt(Math.floor(2 * 10.392304845 * Number(x))) +
-      D ** (N + 2n) / (2n * N ** (N + 1n) * x),
-    3n
+      (2 * Math.pow(3, 3 / 2) * x) +
+      Math.pow(D, N + 2) / (2 * Math.pow(N, N + 1) * x),
+    1 / 3
   );
 
-  return Number(root - x ** 2n / (3n * root));
+  return root - Math.pow(x, 2) / (3 * root);
 }
 
 function inverseVolatileAMM(price: number): number {
-  return univ2Inverse(price * 1e18, total, assetNumber) / 1e18;
+  return univ2Inverse(price, total, assetNumber);
 }
 
 function inverseStableAMM(price: number): number {
-  try {
-    return (
-      hermesInverse(
-        BigInt(Math.floor(price * 1e18)),
-        BigInt(total),
-        BigInt(assetNumber)
-      ) / 1e18
-    );
-  } catch {
-    return 0;
-  }
+  return hermesInverse(price, total, assetNumber);
 }
 
 function liquidityDifference(
