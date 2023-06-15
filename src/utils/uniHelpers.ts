@@ -20,7 +20,6 @@ function getLargerInTicks(tickSpacing: number, minWidth: number): number {
 export function incentiveEfficiencyVsUniswapV2(
   feeTier: number,
   minWidth: number,
-  currentPrice: number,
   priceUpper: number
 ): number {
   const tickSpacing = FEE_TO_TICK_SPACING[feeTier];
