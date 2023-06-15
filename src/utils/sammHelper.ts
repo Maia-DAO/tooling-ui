@@ -41,13 +41,17 @@ function inverseVolatileAMM(price: number): number {
 }
 
 function inverseStableAMM(price: number): number {
-  return (
-    hermesInverse(
-      BigInt(Math.floor(price * 1e18)),
-      BigInt(total),
-      BigInt(assetNumber)
-    ) / 1e18
-  );
+  try {
+    return (
+      hermesInverse(
+        BigInt(Math.floor(price * 1e18)),
+        BigInt(total),
+        BigInt(assetNumber)
+      ) / 1e18
+    );
+  } catch {
+    return 0;
+  }
 }
 
 function liquidityDifference(
